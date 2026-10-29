@@ -36,7 +36,7 @@ Le filtre est un petit script JavaScript sans dépendance, chargé en pied de pa
 
 Remplacez `nom_du_template` par le nom de votre template Gantry (par exemple `rt_phoenix`).
 
-> Ces fichiers remplacent ceux d'origine du template : faites-en une copie de sauvegarde avant, et pensez à les recopier après une mise à jour du template.
+> Ces fichiers s'ajoutent ou remplacent ceux d'origine du template : faites-en une copie de sauvegarde avant, et pensez à les recopier après une mise à jour du template.
 
 1. Copiez `imagegrid.html.twig` et `imagegrid.yaml` dans le dossier `particles` du template :
    ```
