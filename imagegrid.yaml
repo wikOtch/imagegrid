@@ -59,6 +59,39 @@ form:
       description: Customize the album name.
       placeholder: Enter album name
 
+    filter:
+      type: input.checkbox
+      label: Tag Filter
+      description: Display a button for each tag above the grid to show only the matching images.
+      default: true
+
+    filterall:
+      type: input.text
+      label: All Button Text
+      description: Text of the button that shows every image.
+      placeholder: Tous
+      default: Tous
+
+    search:
+      type: input.checkbox
+      label: Tag Search
+      description: Display a search field to filter the images by tag.
+      default: false
+
+    searchplaceholder:
+      type: input.text
+      label: Search Placeholder
+      description: Placeholder text of the tag search field.
+      placeholder: Rechercher un tag…
+      default: Rechercher un tag…
+
+    emptytext:
+      type: input.text
+      label: No Result Text
+      description: Text displayed when no image matches the selected tag.
+      placeholder: Aucune image ne correspond à ce tag.
+      default: Aucune image ne correspond à ce tag.
+
     imagegriditems:
       type: collection.list
       array: true
@@ -77,3 +110,13 @@ form:
           label: Caption
           description: Customize the image caption.
           placeholder: Enter caption
+        .alt:
+          type: input.text
+          label: Alternative Text
+          description: Describe the image (alt attribute). Also used as the image title. Defaults to the caption when empty.
+          placeholder: Enter alternative text
+        .tags:
+          type: input.text
+          label: Tags
+          description: Comma-separated list of tags (e.g. nature, montagne).
+          placeholder: tag1, tag2

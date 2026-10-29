@@ -4,19 +4,58 @@
 
 {% block particle %}
 
+    {% set filter = particle.filter is not defined or particle.filter %}
+    {% set search = particle.search %}
+
+    {# Collect the unique tags of all images #}
+    {% set alltags = [] %}
+    {% for imagegriditem in particle.imagegriditems %}
+        {% for tag in imagegriditem.tags|default('')|split(',') %}
+            {% set tag = tag|trim|lower %}
+            {% if tag and tag not in alltags %}
+                {% set alltags = alltags|merge([tag]) %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+
     {% if particle.title %}<h2 class="g-title">{{ particle.title|raw }}</h2>{% endif %}
 
-    <div class="g-imagegrid {{ particle.class|e }}">
+    <div class="g-imagegrid {{ particle.class|e }}"{% if (filter or search) and alltags %} data-imagegrid-filter{% endif %}>
 
         {% if particle.desc %}<div class="g-imagegrid-desc">{{ particle.desc|raw }}</div>{% endif %}
 
+        {% if (filter or search) and alltags %}
+            <div class="g-imagegrid-filters">
+                {% if search %}
+                    {% set searchplaceholder = particle.searchplaceholder|default('Rechercher un tag…') %}
+                    <input type="search" class="g-imagegrid-search" placeholder="{{ searchplaceholder|e }}" aria-label="{{ searchplaceholder|e }}" />
+                {% endif %}
+                {% if filter %}
+                    <div class="g-imagegrid-tags" role="group" aria-label="Tags">
+                        <button type="button" class="g-imagegrid-filter active" data-filter="*" aria-pressed="true">{{ particle.filterall|default('Tous')|e }}</button>
+                        {% for tag in alltags|sort %}
+                            <button type="button" class="g-imagegrid-filter" data-filter="{{ tag|e('html_attr') }}" aria-pressed="false">{{ tag|e }}</button>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
         <div class="g-imagegrid-wrapper {{ particle.cols|e }} {{ particle.layout }}">
             {% for imagegriditem in particle.imagegriditems %}
-                <div class="g-imagegrid-item">
+                {% set itemtags = [] %}
+                {% for tag in imagegriditem.tags|default('')|split(',') %}
+                    {% set tag = tag|trim|lower %}
+                    {% if tag %}
+                        {% set itemtags = itemtags|merge([tag]) %}
+                    {% endif %}
+                {% endfor %}
+                {% set alt = imagegriditem.alt|default(imagegriditem.caption) %}
+                <div class="g-imagegrid-item"{% if itemtags %} data-tags="{{ itemtags|join('|')|e('html_attr') }}"{% endif %}>
                     <a class="g-imagegrid-link" href="{{ url(imagegriditem.image)|e }}" data-rel="lightcase{% if particle.album %}:{{ particle.album }}{% endif %}">
                         {% if particle.layout == 'g-imagegrid-captions' %}
                         {% endif %}
-                        <img src="{{ url(imagegriditem.image)|e }}" alt="{{ imagegriditem.caption|e }}" />
+                        <img src="{{ url(imagegriditem.image)|e }}" alt="{{ alt|e }}"{% if alt %} title="{{ alt|e }}"{% endif %} />
                         <div class="indicator">
                             <div>
                                 {% if particle.layout == 'g-imagegrid-standard' %}
@@ -33,6 +72,82 @@
             {% endfor %}
 
         </div>
+
+        {% if (filter or search) and alltags %}
+            <p class="g-imagegrid-empty" hidden>{{ particle.emptytext|default('Aucune image ne correspond à ce tag.')|e }}</p>
+        {% endif %}
     </div>
+
+    {% if (filter or search) and alltags %}
+        {% scripts in 'footer' %}
+            <script>
+                (function () {
+                    if (window.gImagegridFilter) { return; }
+                    window.gImagegridFilter = true;
+
+                    // Lowercase and strip accents so "Été" matches "ete"
+                    function normalize(str) {
+                        str = (str || '').toLowerCase().trim();
+                        return str.normalize ? str.normalize('NFD').replace(/[̀-ͯ]/g, '') : str;
+                    }
+
+                    function setup(grid) {
+                        var buttons = grid.querySelectorAll('.g-imagegrid-filter');
+                        var search = grid.querySelector('.g-imagegrid-search');
+                        var items = grid.querySelectorAll('.g-imagegrid-item');
+                        var empty = grid.querySelector('.g-imagegrid-empty');
+                        var current = '*';
+
+                        Array.prototype.forEach.call(items, function (item) {
+                            var link = item.querySelector('.g-imagegrid-link');
+                            if (link) { link.setAttribute('data-imagegrid-rel', link.getAttribute('data-rel')); }
+                        });
+
+                        function apply() {
+                            var query = search ? normalize(search.value) : '';
+                            var visible = 0;
+
+                            Array.prototype.forEach.call(items, function (item) {
+                                var tags = (item.getAttribute('data-tags') || '').split('|').filter(Boolean);
+                                var show = (current === '*' || tags.indexOf(current) !== -1) &&
+                                    (!query || tags.some(function (tag) { return normalize(tag).indexOf(query) !== -1; }));
+                                var link = item.querySelector('.g-imagegrid-link');
+
+                                item.classList.toggle('g-imagegrid-hidden', !show);
+                                // Keep hidden images out of the lightcase album navigation
+                                if (link) { link.setAttribute('data-rel', show ? link.getAttribute('data-imagegrid-rel') : 'lightcase'); }
+                                if (show) { visible++; }
+                            });
+
+                            if (empty) { empty.hidden = visible > 0; }
+                        }
+
+                        Array.prototype.forEach.call(buttons, function (button) {
+                            button.addEventListener('click', function () {
+                                current = button.getAttribute('data-filter');
+                                Array.prototype.forEach.call(buttons, function (other) {
+                                    other.classList.toggle('active', other === button);
+                                    other.setAttribute('aria-pressed', other === button ? 'true' : 'false');
+                                });
+                                apply();
+                            });
+                        });
+
+                        if (search) { search.addEventListener('input', apply); }
+                    }
+
+                    function init() {
+                        Array.prototype.forEach.call(document.querySelectorAll('.g-imagegrid[data-imagegrid-filter]'), setup);
+                    }
+
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', init);
+                    } else {
+                        init();
+                    }
+                })();
+            </script>
+        {% endscripts %}
+    {% endif %}
 
 {% endblock %}
