@@ -34,22 +34,18 @@ Le filtre est un petit script JavaScript sans dépendance, chargé en pied de pa
 
 ### Installation
 
-Gantry permet de remplacer un fichier du template sans le modifier, en plaçant sa copie dans le dossier `custom` du template. Vos fichiers sont ainsi conservés lors des mises à jour du template.
+Remplacez `nom_du_template` par le nom de votre template Gantry (par exemple `rt_phoenix`).
 
-Dossier du template :
-- Joomla : `templates/rt_phoenix/`
-- WordPress : `wp-content/themes/rt_phoenix/`
+> Ces fichiers remplacent ceux d'origine du template : faites-en une copie de sauvegarde avant, et pensez à les recopier après une mise à jour du template.
 
-(Remplacez `rt_phoenix` par le nom de votre template Gantry.)
-
-1. Copiez `imagegrid.yaml` et `imagegrid.html.twig` dans `custom/particles/` :
+1. Copiez `imagegrid.html.twig` et `imagegrid.yaml` dans le dossier `particles` du template :
    ```
-   templates/rt_phoenix/custom/particles/imagegrid.yaml
-   templates/rt_phoenix/custom/particles/imagegrid.html.twig
+   templates/nom_du_template/particles/imagegrid.html.twig
+   templates/nom_du_template/particles/imagegrid.yaml
    ```
-2. Copiez `_imagegrid.scss` dans `custom/scss/`, **au même chemin relatif** que le fichier d'origine du template. Cherchez `_imagegrid.scss` dans le dossier `scss/` du template. Par exemple, si l'original est `scss/phoenix/particles/_imagegrid.scss`, la copie va dans :
+2. Copiez `_imagegrid.scss` dans le dossier `scss/nom_du_template/particles` du template :
    ```
-   templates/rt_phoenix/custom/scss/phoenix/particles/_imagegrid.scss
+   templates/nom_du_template/scss/nom_du_template/particles/_imagegrid.scss
    ```
 3. Videz le cache Gantry (administration Gantry → bouton *Clear Cache*) pour recompiler le CSS, puis le cache Joomla (Système → Vider le cache).
 
@@ -93,22 +89,18 @@ The filter is a small dependency-free JavaScript, loaded in the footer only when
 
 ### Installation
 
-Gantry lets you override a template file without editing it, by placing a copy in the template's `custom` folder. Your files are kept when the template is updated.
+Replace `template_name` with the name of your Gantry template (for example `rt_phoenix`).
 
-Template folder:
-- Joomla: `templates/rt_phoenix/`
-- WordPress: `wp-content/themes/rt_phoenix/`
+> These files replace the template's original ones: back them up first, and copy them again after a template update.
 
-(Replace `rt_phoenix` with the name of your Gantry template.)
-
-1. Copy `imagegrid.yaml` and `imagegrid.html.twig` into `custom/particles/`:
+1. Copy `imagegrid.html.twig` and `imagegrid.yaml` into the template's `particles` folder:
    ```
-   templates/rt_phoenix/custom/particles/imagegrid.yaml
-   templates/rt_phoenix/custom/particles/imagegrid.html.twig
+   templates/template_name/particles/imagegrid.html.twig
+   templates/template_name/particles/imagegrid.yaml
    ```
-2. Copy `_imagegrid.scss` into `custom/scss/`, **at the same relative path** as the template's original file. Look for `_imagegrid.scss` in the template's `scss/` folder. For example, if the original is `scss/phoenix/particles/_imagegrid.scss`, the copy goes to:
+2. Copy `_imagegrid.scss` into the template's `scss/template_name/particles` folder:
    ```
-   templates/rt_phoenix/custom/scss/phoenix/particles/_imagegrid.scss
+   templates/template_name/scss/template_name/particles/_imagegrid.scss
    ```
 3. Clear the Gantry cache (Gantry admin → *Clear Cache* button) to recompile the CSS, then the Joomla cache (System → Clear Cache).
 
