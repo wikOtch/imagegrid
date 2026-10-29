@@ -52,7 +52,7 @@
                 {% endfor %}
                 {% set alt = imagegriditem.alt|default(imagegriditem.caption) %}
                 <div class="g-imagegrid-item"{% if itemtags %} data-tags="{{ itemtags|join('|')|e('html_attr') }}"{% endif %}>
-                    <a class="g-imagegrid-link" href="{{ url(imagegriditem.image)|e }}" data-rel="lightcase{% if particle.album %}:{{ particle.album }}{% endif %}">
+                    <a class="g-imagegrid-link" href="{{ url(imagegriditem.image)|e }}" data-rel="lightcase{% if particle.album %}:{{ particle.album }}{% endif %}"{% if alt %} title="{{ alt|e }}"{% endif %}>
                         {% if particle.layout == 'g-imagegrid-captions' %}
                         {% endif %}
                         <img src="{{ url(imagegriditem.image)|e }}" alt="{{ alt|e }}"{% if alt %} title="{{ alt|e }}"{% endif %} />
