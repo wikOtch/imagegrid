@@ -50,12 +50,13 @@
                         {% set itemtags = itemtags|merge([tag]) %}
                     {% endif %}
                 {% endfor %}
-                {% set alt = imagegriditem.alt|default(imagegriditem.caption) %}
+                {# Lightcase injects the title and caption as HTML: keep plain text only #}
+                {% set alt = imagegriditem.alt|default(imagegriditem.caption)|striptags|trim %}
                 <div class="g-imagegrid-item"{% if itemtags %} data-tags="{{ itemtags|join('|')|e('html_attr') }}"{% endif %}>
-                    <a class="g-imagegrid-link" href="{{ url(imagegriditem.image)|e }}" data-rel="lightcase{% if particle.album %}:{{ particle.album }}{% endif %}"{% if alt %} title="{{ alt|e }}"{% endif %}>
+                    <a class="g-imagegrid-link" href="{{ url(imagegriditem.image)|e }}" data-rel="lightcase{% if particle.album %}:{{ particle.album|e('html_attr') }}{% endif %}"{% if alt %} data-lc-title="{{ alt|e('html_attr') }}"{% endif %}>
                         {% if particle.layout == 'g-imagegrid-captions' %}
                         {% endif %}
-                        <img src="{{ url(imagegriditem.image)|e }}" alt="{{ alt|e }}"{% if alt %} title="{{ alt|e }}"{% endif %} />
+                        <img src="{{ url(imagegriditem.image)|e }}" alt="{{ alt|e('html_attr') }}" />
                         <div class="indicator">
                             <div>
                                 {% if particle.layout == 'g-imagegrid-standard' %}
@@ -77,6 +78,25 @@
             <p class="g-imagegrid-empty" hidden>{{ particle.emptytext|default('Aucune image ne correspond à ce tag.')|e }}</p>
         {% endif %}
     </div>
+
+    {% scripts in 'footer' %}
+        <script>
+            (function () {
+                if (window.gImagegridLightboxTitle) { return; }
+                window.gImagegridLightboxTitle = true;
+
+                // Show the title as a tooltip on the enlarged image only (Lightcase copies it into the alt)
+                document.addEventListener('mouseover', function (event) {
+                    var img = event.target;
+                    var origin = window.lightcase && window.lightcase.origin && window.lightcase.origin[0];
+
+                    if (img.tagName !== 'IMG' || !img.closest || !img.closest('#lightcase-case') || img.title || !img.alt) { return; }
+                    if (!origin || !origin.closest || !origin.closest('.g-imagegrid')) { return; }
+                    img.title = img.alt;
+                });
+            })();
+        </script>
+    {% endscripts %}
 
     {% if (filter or search) and alltags %}
         {% scripts in 'footer' %}
