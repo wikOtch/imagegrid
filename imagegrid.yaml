@@ -113,7 +113,7 @@ form:
         .alt:
           type: input.text
           label: Alternative Text
-          description: Describe the image (alt attribute). Also used as the image title. Defaults to the caption when empty.
+          description: Describe the image (alt attribute). Also shown as the title of the enlarged image in the lightbox. Defaults to the caption when empty.
           placeholder: Enter alternative text
         .tags:
           type: input.text

@@ -13,7 +13,7 @@ Improved **Image Grid** particle for Gantry 5 templates (tested with RocketTheme
 
 Ce particle reprend l'Image Grid d'origine (grille de 2 à 5 colonnes, légendes, visionneuse Lightcase) et ajoute :
 
-- **Texte alternatif par image** : un champ *Alternative Text* remplit l'attribut `alt` de l'image. Le même texte sert d'attribut `title` sur l'image et sur le lien : il s'affiche en infobulle au survol et comme titre dans la visionneuse Lightcase. Si le champ est vide, la légende est utilisée.
+- **Texte alternatif par image** : un champ *Alternative Text* remplit l'attribut `alt` de l'image. Le même texte sert de titre à l'image agrandie : il s'affiche comme titre dans la visionneuse Lightcase et en infobulle au survol de l'image agrandie. Les miniatures de la grille n'ont pas d'attribut `title`, donc pas d'infobulle. Si le champ est vide, la légende est utilisée. Les balises HTML éventuelles sont retirées.
 - **Tags par image** : un champ *Tags* reçoit une liste de tags séparés par des virgules (ex. `mixage, documentaire`). Les tags ne tiennent pas compte des majuscules.
 - **Filtre par tag** (option *Tag Filter*, activée par défaut) : une rangée de boutons au-dessus de la grille, « Tous » puis un bouton par tag, triés par ordre alphabétique. Un clic n'affiche que les images portant ce tag.
 - **Recherche par tag** (option *Tag Search*, désactivée par défaut) : un champ de recherche filtre les images pendant la frappe, sans tenir compte des accents (« ete » trouve « été »).
@@ -68,7 +68,7 @@ Remplacez `nom_du_template` par le nom de votre template Gantry (par exemple `rt
 
 This particle builds on the original Image Grid (2 to 5 column grid, captions, Lightcase lightbox) and adds:
 
-- **Per-image alternative text**: an *Alternative Text* field fills the image `alt` attribute. The same text is used as the `title` attribute on the image and on the link, so it shows as a tooltip on hover and as the title in the Lightcase lightbox. When the field is empty, the caption is used.
+- **Per-image alternative text**: an *Alternative Text* field fills the image `alt` attribute. The same text is used as the title of the enlarged image: it shows as the title in the Lightcase lightbox and as a tooltip when hovering the enlarged image. The grid thumbnails have no `title` attribute, so no tooltip. When the field is empty, the caption is used. Any HTML tags are stripped.
 - **Per-image tags**: a *Tags* field takes a comma-separated list of tags (e.g. `mixing, documentary`). Tags are case-insensitive.
 - **Tag filter** (*Tag Filter* option, on by default): a row of buttons above the grid, "All" then one button per tag, sorted alphabetically. Clicking a button shows only the images with that tag.
 - **Tag search** (*Tag Search* option, off by default): a search field filters the images as you type, ignoring accents ("ete" matches "été").
