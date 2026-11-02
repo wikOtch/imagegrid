@@ -79,95 +79,118 @@
         {% endif %}
     </div>
 
-    {% scripts in 'footer' %}
-        <script>
-            (function () {
-                if (window.gImagegridLightboxTitle) { return; }
-                window.gImagegridLightboxTitle = true;
+    {#
+        The scripts are written inline, not in a Gantry "scripts" block: when Joomla caching is on,
+        the cached page or article keeps the particle HTML but loses the assets Gantry adds to the footer.
+    #}
+    <script>
+        (function () {
+            if (window.gImagegridLightcase) { return; }
+            window.gImagegridLightcase = true;
 
-                // Show the title as a tooltip on the enlarged image only (Lightcase copies it into the alt)
-                document.addEventListener('mouseover', function (event) {
-                    var img = event.target;
-                    var origin = window.lightcase && window.lightcase.origin && window.lightcase.origin[0];
+            // Load Lightcase again when the Joomla cache dropped it
+            window.addEventListener('load', function () {
+                var $ = window.jQuery;
+                var css, js;
 
-                    if (img.tagName !== 'IMG' || !img.closest || !img.closest('#lightcase-case') || img.title || !img.alt) { return; }
-                    if (!origin || !origin.closest || !origin.closest('.g-imagegrid')) { return; }
-                    img.title = img.alt;
-                });
-            })();
-        </script>
-    {% endscripts %}
+                if (!$ || $.fn.lightcase) { return; }
+                css = document.createElement('link');
+                css.rel = 'stylesheet';
+                css.href = '{{ url('gantry-assets://css/lightcase.css')|e('js') }}';
+                document.head.appendChild(css);
+                js = document.createElement('script');
+                js.src = '{{ url('gantry-assets://js/lightcase.js')|e('js') }}';
+                js.onload = function () {
+                    $('[data-rel^=lightcase]').lightcase({maxWidth: '100%', maxHeight: '100%', video: {width: '1280', height: '720'}});
+                };
+                document.head.appendChild(js);
+            });
+        })();
+
+        (function () {
+            if (window.gImagegridLightboxTitle) { return; }
+            window.gImagegridLightboxTitle = true;
+
+            // Show the title as a tooltip on the enlarged image only (Lightcase copies it into the alt)
+            document.addEventListener('mouseover', function (event) {
+                var img = event.target;
+                var origin = window.lightcase && window.lightcase.origin && window.lightcase.origin[0];
+
+                if (img.tagName !== 'IMG' || !img.closest || !img.closest('#lightcase-case') || img.title || !img.alt) { return; }
+                if (!origin || !origin.closest || !origin.closest('.g-imagegrid')) { return; }
+                img.title = img.alt;
+            });
+        })();
+    </script>
 
     {% if (filter or search) and alltags %}
-        {% scripts in 'footer' %}
-            <script>
-                (function () {
-                    if (window.gImagegridFilter) { return; }
-                    window.gImagegridFilter = true;
+        <script>
+            (function () {
+                if (window.gImagegridFilter) { return; }
+                window.gImagegridFilter = true;
 
-                    // Lowercase and strip accents so "Été" matches "ete"
-                    function normalize(str) {
-                        str = (str || '').toLowerCase().trim();
-                        return str.normalize ? str.normalize('NFD').replace(/[̀-ͯ]/g, '') : str;
-                    }
+                // Lowercase and strip accents so "Été" matches "ete"
+                function normalize(str) {
+                    str = (str || '').toLowerCase().trim();
+                    return str.normalize ? str.normalize('NFD').replace(/[̀-ͯ]/g, '') : str;
+                }
 
-                    function setup(grid) {
-                        var buttons = grid.querySelectorAll('.g-imagegrid-filter');
-                        var search = grid.querySelector('.g-imagegrid-search');
-                        var items = grid.querySelectorAll('.g-imagegrid-item');
-                        var empty = grid.querySelector('.g-imagegrid-empty');
-                        var current = '*';
+                function setup(grid) {
+                    var buttons = grid.querySelectorAll('.g-imagegrid-filter');
+                    var search = grid.querySelector('.g-imagegrid-search');
+                    var items = grid.querySelectorAll('.g-imagegrid-item');
+                    var empty = grid.querySelector('.g-imagegrid-empty');
+                    var current = '*';
+
+                    Array.prototype.forEach.call(items, function (item) {
+                        var link = item.querySelector('.g-imagegrid-link');
+                        if (link) { link.setAttribute('data-imagegrid-rel', link.getAttribute('data-rel')); }
+                    });
+
+                    function apply() {
+                        var query = search ? normalize(search.value) : '';
+                        var visible = 0;
 
                         Array.prototype.forEach.call(items, function (item) {
+                            var tags = (item.getAttribute('data-tags') || '').split('|').filter(Boolean);
+                            var show = (current === '*' || tags.indexOf(current) !== -1) &&
+                                (!query || tags.some(function (tag) { return normalize(tag).indexOf(query) !== -1; }));
                             var link = item.querySelector('.g-imagegrid-link');
-                            if (link) { link.setAttribute('data-imagegrid-rel', link.getAttribute('data-rel')); }
+
+                            item.classList.toggle('g-imagegrid-hidden', !show);
+                            // Keep hidden images out of the lightcase album navigation
+                            if (link) { link.setAttribute('data-rel', show ? link.getAttribute('data-imagegrid-rel') : 'lightcase'); }
+                            if (show) { visible++; }
                         });
 
-                        function apply() {
-                            var query = search ? normalize(search.value) : '';
-                            var visible = 0;
+                        if (empty) { empty.hidden = visible > 0; }
+                    }
 
-                            Array.prototype.forEach.call(items, function (item) {
-                                var tags = (item.getAttribute('data-tags') || '').split('|').filter(Boolean);
-                                var show = (current === '*' || tags.indexOf(current) !== -1) &&
-                                    (!query || tags.some(function (tag) { return normalize(tag).indexOf(query) !== -1; }));
-                                var link = item.querySelector('.g-imagegrid-link');
-
-                                item.classList.toggle('g-imagegrid-hidden', !show);
-                                // Keep hidden images out of the lightcase album navigation
-                                if (link) { link.setAttribute('data-rel', show ? link.getAttribute('data-imagegrid-rel') : 'lightcase'); }
-                                if (show) { visible++; }
+                    Array.prototype.forEach.call(buttons, function (button) {
+                        button.addEventListener('click', function () {
+                            current = button.getAttribute('data-filter');
+                            Array.prototype.forEach.call(buttons, function (other) {
+                                other.classList.toggle('active', other === button);
+                                other.setAttribute('aria-pressed', other === button ? 'true' : 'false');
                             });
-
-                            if (empty) { empty.hidden = visible > 0; }
-                        }
-
-                        Array.prototype.forEach.call(buttons, function (button) {
-                            button.addEventListener('click', function () {
-                                current = button.getAttribute('data-filter');
-                                Array.prototype.forEach.call(buttons, function (other) {
-                                    other.classList.toggle('active', other === button);
-                                    other.setAttribute('aria-pressed', other === button ? 'true' : 'false');
-                                });
-                                apply();
-                            });
+                            apply();
                         });
+                    });
 
-                        if (search) { search.addEventListener('input', apply); }
-                    }
+                    if (search) { search.addEventListener('input', apply); }
+                }
 
-                    function init() {
-                        Array.prototype.forEach.call(document.querySelectorAll('.g-imagegrid[data-imagegrid-filter]'), setup);
-                    }
+                function init() {
+                    Array.prototype.forEach.call(document.querySelectorAll('.g-imagegrid[data-imagegrid-filter]'), setup);
+                }
 
-                    if (document.readyState === 'loading') {
-                        document.addEventListener('DOMContentLoaded', init);
-                    } else {
-                        init();
-                    }
-                })();
-            </script>
-        {% endscripts %}
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', init);
+                } else {
+                    init();
+                }
+            })();
+        </script>
     {% endif %}
 
 {% endblock %}

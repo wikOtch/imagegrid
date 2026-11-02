@@ -22,7 +22,9 @@ Ce particle reprend l'Image Grid d'origine (grille de 2 à 5 colonnes, légendes
 - **Accessibilité** : les boutons indiquent le filtre actif (`aria-pressed`) et le champ de recherche a un libellé.
 - Les textes du bouton « Tous », du champ de recherche et du message sont modifiables dans les réglages du particle.
 
-Le filtre est un petit script JavaScript sans dépendance, chargé en pied de page uniquement si au moins une image a un tag. Sans tags, le particle s'affiche comme l'original.
+Le filtre est un petit script JavaScript sans dépendance, écrit dans le code du particle uniquement si au moins une image a un tag. Sans tags, le particle s'affiche comme l'original.
+
+**Cache Joomla** : les scripts sont écrits dans le HTML du particle, et Lightcase est rechargé s'il manque, pour que le filtre et la visionneuse fonctionnent aussi quand la page sort du cache Joomla. Quand le module est affiché dans un article avec `{loadmoduleid}`, Joomla garde l'article en cache : après une modification des images, des textes ou des tags, videz le cache (Système → Vider le cache) pour voir les changements tout de suite.
 
 ### Fichiers
 
@@ -77,7 +79,9 @@ This particle builds on the original Image Grid (2 to 5 column grid, captions, L
 - **Accessibility**: the buttons expose the active filter (`aria-pressed`) and the search field has a label.
 - The "All" button, search placeholder and message texts can be changed in the particle settings.
 
-The filter is a small dependency-free JavaScript, loaded in the footer only when at least one image has a tag. Without tags, the particle renders like the original.
+The filter is a small dependency-free JavaScript, written into the particle output only when at least one image has a tag. Without tags, the particle renders like the original.
+
+**Joomla cache**: the scripts are written into the particle HTML, and Lightcase is loaded again when missing, so the filter and the lightbox also work when the page comes from the Joomla cache. When the module is shown in an article with `{loadmoduleid}`, Joomla caches the article: after changing the images, texts or tags, clear the cache (System → Clear Cache) to see the changes right away.
 
 ### Files
 
