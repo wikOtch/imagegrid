@@ -52,6 +52,18 @@
                 {% endfor %}
                 {# Lightcase injects the title and caption as HTML: keep plain text only #}
                 {% set alt = imagegriditem.alt|default(imagegriditem.caption)|striptags|trim %}
+                {# Film details, copied as text nodes next to the enlarged image by the script below #}
+                {% set filmtitle = imagegriditem.filmtitle|default('')|trim %}
+                {% set filmdetails = [
+                    {label: particle.filmyearlabel|default('Année'), value: imagegriditem.filmyear|default('')|trim},
+                    {label: particle.filmdirectorlabel|default('Réalisateur'), value: imagegriditem.filmdirector|default('')|trim},
+                    {label: particle.filmproductionlabel|default('Production'), value: imagegriditem.filmproduction|default('')|trim},
+                    {label: particle.filmfestivallabel|default('Festival'), value: imagegriditem.filmfestival|default('')|trim}
+                ] %}
+                {% set hasfilm = filmtitle %}
+                {% for detail in filmdetails %}
+                    {% if detail.value %}{% set hasfilm = true %}{% endif %}
+                {% endfor %}
                 <div class="g-imagegrid-item"{% if itemtags %} data-tags="{{ itemtags|join('|')|e('html_attr') }}"{% endif %}>
                     <a class="g-imagegrid-link" href="{{ url(imagegriditem.image)|e }}" data-rel="lightcase{% if particle.album %}:{{ particle.album|e('html_attr') }}{% endif %}"{% if alt %} data-lc-title="{{ alt|e('html_attr') }}"{% endif %}>
                         {% if particle.layout == 'g-imagegrid-captions' %}
@@ -69,6 +81,24 @@
                             </div>
                         </div>
                     </a>
+                    {% if hasfilm %}
+                        <div class="g-imagegrid-film" hidden>
+                            {# The lightbox title already shows the alternative text: no need to repeat it #}
+                            {% if filmtitle and filmtitle|lower != alt|lower %}
+                                <p class="g-imagegrid-film-title">{{ filmtitle|e }}</p>
+                            {% endif %}
+                            <dl class="g-imagegrid-film-details">
+                                {% for detail in filmdetails %}
+                                    {% if detail.value %}
+                                        <div>
+                                            <dt>{{ detail.label|e }}</dt>
+                                            <dd>{{ detail.value|e|nl2br }}</dd>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </dl>
+                        </div>
+                    {% endif %}
                 </div>
             {% endfor %}
 
@@ -88,12 +118,133 @@
             if (window.gImagegridLightcase) { return; }
             window.gImagegridLightcase = true;
 
+            var root = document.documentElement;
+            var openClass = 'g-imagegrid-film-open';
+            var wide = window.matchMedia ? window.matchMedia('(min-width: 641px)') : null;
+
+            function infoBox() {
+                return document.getElementById('lightcase-info');
+            }
+
+            function removeFilm() {
+                var info = infoBox();
+                var box = document.getElementById('lightcase-case');
+                var old = info && info.querySelector('.g-imagegrid-film');
+
+                root.classList.remove(openClass);
+                if (old) { old.parentNode.removeChild(old); }
+                if (info) { info.style.maxHeight = ''; }
+                if (box) { box.style.translate = ''; }
+            }
+
+            // Height of the lightbox texts, measured even while Lightcase keeps them hidden for the fade-in
+            function infoHeight(info) {
+                var display = info.style.display;
+                var height;
+
+                info.style.display = 'block';
+                info.style.maxHeight = '';
+                height = info.offsetHeight;
+                info.style.display = display;
+                return height;
+            }
+
+            // Before Lightcase sizes the image: keep room for the film details,
+            // next to the image on wide screens, under it on small screens
+            function fit() {
+                var info = infoBox();
+                var settings = window.lightcase && window.lightcase.settings;
+
+                if (!settings || !info || !root.classList.contains(openClass)) { return; }
+
+                if (!wide || wide.matches) {
+                    settings.maxWidth = Math.max(160, window.innerWidth - Math.min(344, window.innerWidth * 0.35) - 120);
+                    settings.maxHeight = '100%';
+                } else {
+                    settings.maxWidth = '100%';
+                    settings.maxHeight = Math.max(window.innerHeight * 0.4, window.innerHeight - 80 - infoHeight(info));
+                }
+            }
+
+            // After Lightcase sized the image: keep the image and the details inside the screen
+            function place() {
+                var info = infoBox();
+                var box = document.getElementById('lightcase-case');
+                var screen = window.innerHeight;
+                var image, details, top;
+
+                if (!info || !box || !root.classList.contains(openClass)) { return; }
+
+                image = box.offsetHeight;
+                if (!wide || wide.matches) {
+                    box.style.translate = '';
+                    info.style.maxHeight = Math.max(120, (screen + image) / 2 - 20) + 'px';
+                    return;
+                }
+
+                // Small screens: the image and the details (title included) are centered together, under the close button
+                details = infoHeight(info);
+                top = Math.max(55, (screen - image - details) / 2);
+                box.style.translate = '0 ' + Math.round(top - (screen - image) / 2) + 'px';
+                info.style.maxHeight = Math.max(80, screen - top - image - 10) + 'px';
+            }
+
+            // Copy the film details of the opened image into the lightbox (cloned nodes: no HTML parsing)
+            function showFilm() {
+                var link = this && this[0];
+                var item = link && link.closest ? link.closest('.g-imagegrid-item') : null;
+                var film = item ? item.querySelector('.g-imagegrid-film') : null;
+                var info = infoBox();
+                var title = document.getElementById('lightcase-title');
+                var caption = document.getElementById('lightcase-caption');
+                var copy;
+
+                removeFilm();
+                if (!film || !info) { return; }
+
+                // Lightcase repeats the alternative text as the caption: show it once next to the details
+                if (title && caption && caption.textContent === title.textContent) { caption.style.display = 'none'; }
+
+                copy = film.cloneNode(true);
+                copy.hidden = false;
+                info.appendChild(copy);
+                root.classList.add(openClass);
+                fit();
+            }
+
+            var options = {
+                maxWidth: '100%',
+                maxHeight: '100%',
+                video: {width: '1280', height: '720'},
+                onStart: {gImagegrid: removeFilm},
+                onBeforeCalculateDimensions: {gImagegrid: showFilm},
+                onAfterCalculateDimensions: {gImagegrid: place},
+                onResize: {gImagegrid: place},
+                onClose: {gImagegrid: removeFilm}
+            };
+
+            // Same options as Gantry, plus the film details hooks for the image grid links
+            function bind() {
+                var $ = window.jQuery;
+
+                if (!$ || !$.fn.lightcase) { return false; }
+                $('.g-imagegrid [data-rel^=lightcase]').lightcase(options);
+                return true;
+            }
+
+            // Runs before the Lightcase resize handler (capture), so the new sizes are used right away
+            window.addEventListener('resize', fit, true);
+
+            document.addEventListener('DOMContentLoaded', function () {
+                setTimeout(bind, 0);
+            });
+
             // Load Lightcase again when the Joomla cache dropped it
             window.addEventListener('load', function () {
                 var $ = window.jQuery;
                 var css, js;
 
-                if (!$ || $.fn.lightcase) { return; }
+                if (bind() || !$) { return; }
                 css = document.createElement('link');
                 css.rel = 'stylesheet';
                 css.href = '{{ url('gantry-assets://css/lightcase.css')|e('js') }}';
@@ -102,6 +253,7 @@
                 js.src = '{{ url('gantry-assets://js/lightcase.js')|e('js') }}';
                 js.onload = function () {
                     $('[data-rel^=lightcase]').lightcase({maxWidth: '100%', maxHeight: '100%', video: {width: '1280', height: '720'}});
+                    bind();
                 };
                 document.head.appendChild(js);
             });
@@ -129,10 +281,10 @@
                 if (window.gImagegridFilter) { return; }
                 window.gImagegridFilter = true;
 
-                // Lowercase and strip accents so "Été" matches "ete"
+                // Lowercase and strip accents so "Été" matches "ete" (escaped range: Gantry re-encodes non-ASCII text in footer scripts)
                 function normalize(str) {
                     str = (str || '').toLowerCase().trim();
-                    return str.normalize ? str.normalize('NFD').replace(/[̀-ͯ]/g, '') : str;
+                    return str.normalize ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : str;
                 }
 
                 function setup(grid) {

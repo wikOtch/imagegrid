@@ -205,3 +205,77 @@
         }
     }
 }
+
+// Film details shown with the enlarged image. Lightcase is added at the end of the page, outside the particle.
+.g-imagegrid-film-open {
+    #lightcase-info {
+        box-sizing: border-box;
+        text-shadow: none;
+    }
+    .g-imagegrid-film {
+        margin-top: 0.75rem;
+        color: #ddd;
+        font-size: 14px;
+        line-height: 1.5;
+        text-align: left;
+    }
+    .g-imagegrid-film-title {
+        margin: 0 0 0.75rem;
+        color: $white;
+        font-size: 20px;
+        font-weight: $font-weight-bold;
+        line-height: 1.3;
+    }
+    .g-imagegrid-film-details {
+        margin: 0;
+
+        div {
+            margin: 0 0 0.6rem;
+        }
+        dt {
+            margin: 0;
+            color: #aaa;
+            font-size: 11px;
+            font-weight: normal;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        dd {
+            margin: 0;
+            color: $white;
+        }
+    }
+
+    // Wide screens: the details sit next to the image, and the image + details pair stays centered
+    @media screen and (min-width: 641px) {
+        #lightcase-case {
+            translate: calc(min(344px, 35vw) / -2) 0;
+        }
+        #lightcase-info {
+            top: 0;
+            left: 100%;
+            width: min(344px, 35vw);
+            padding: 0 0 0 24px;
+            overflow-y: auto;
+        }
+        .g-imagegrid-film {
+            margin-top: 0.5rem;
+        }
+    }
+
+    // Small screens: the title and the details are under the image (Lightcase would lay the title over the image)
+    @media screen and (max-width: 640px) {
+        #lightcase-info {
+            left: 0;
+            right: 0;
+            overflow-y: auto;
+
+            #lightcase-title {
+                position: static;
+                max-width: none;
+                padding: 0;
+                background: none;
+            }
+        }
+    }
+}
