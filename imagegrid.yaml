@@ -92,6 +92,34 @@ form:
       placeholder: Aucune image ne correspond à ce tag.
       default: Aucune image ne correspond à ce tag.
 
+    filmyearlabel:
+      type: input.text
+      label: Year Label
+      description: Label of the film year in the film details shown with the enlarged image.
+      placeholder: Année
+      default: Année
+
+    filmdirectorlabel:
+      type: input.text
+      label: Director Label
+      description: Label of the film director in the film details shown with the enlarged image.
+      placeholder: Réalisateur
+      default: Réalisateur
+
+    filmproductionlabel:
+      type: input.text
+      label: Production Label
+      description: Label of the film production in the film details shown with the enlarged image.
+      placeholder: Production
+      default: Production
+
+    filmfestivallabel:
+      type: input.text
+      label: Festival Label
+      description: Label of the film festivals in the film details shown with the enlarged image.
+      placeholder: Festival
+      default: Festival
+
     imagegriditems:
       type: collection.list
       array: true
@@ -120,3 +148,28 @@ form:
           label: Tags
           description: Comma-separated list of tags (e.g. nature, montagne).
           placeholder: tag1, tag2
+        .filmtitle:
+          type: input.text
+          label: Film Title
+          description: Title of the film, shown next to the enlarged image. Leave the film fields empty for an image without film details.
+          placeholder: Enter film title
+        .filmyear:
+          type: input.text
+          label: Year
+          description: Year of the film (e.g. 2024).
+          placeholder: '2024'
+        .filmdirector:
+          type: input.text
+          label: Director
+          description: Director(s) of the film.
+          placeholder: Enter director
+        .filmproduction:
+          type: input.text
+          label: Production
+          description: Production company or companies of the film.
+          placeholder: Enter production
+        .filmfestival:
+          type: textarea.textarea
+          label: Festival
+          description: Festivals and awards, one per line.
+          placeholder: Enter festivals, one per line
